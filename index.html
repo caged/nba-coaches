@@ -18,6 +18,11 @@
     font-weight: bold;
     font-size: 12px;
   }
+
+  .year {
+    stroke-width: 3;
+    stroke: #eee;
+  }
   </style>
   <script src="https://d3js.org/d3.v4.0.0-alpha.35.min.js"></script>
 </head>
@@ -64,7 +69,9 @@ var DEFUNCT = ['SHE', 'WAT', 'STB', 'WSC', 'AND', 'DNN', 'CHS', 'BLB', 'INO']
 
 var margin = { top: 50, right: 20, bottom: 0, left: 50 },
     width  = 1400 - margin.left - margin.right,
-    height = 1400 - margin.top - margin.bottom
+    height = 1800 - margin.top - margin.bottom
+
+var line = d3.line()
 
 function parseRow(row) {
   row.start = +row.season.split('-')[0]
@@ -74,14 +81,17 @@ function parseRow(row) {
 }
 
 d3.csv("/coaches.csv", parseRow, function(err, data) {
-  data = data.filter(function(d) { return !DEFUNCT.includes(d.team) })
+  data = data.filter(function(d) { return !DEFUNCT.includes(d.team) && d.start >= 1970 })
+  var maxYear = d3.max(data, function(d) { return d.end }),
+      minYear = d3.min(data, function(d) { return d.start })
+
   var teams = d3.nest()
     .key(function(d) { return d.team })
     .sortKeys(d3.ascending)
     .entries(data)
 
   var x = d3.scaleLinear()
-    .domain(d3.extent(data, function(d) { return d.start }))
+    .domain([minYear, maxYear])
     .range([0, width])
 
   var y = d3.scaleBand()
@@ -106,18 +116,24 @@ d3.csv("/coaches.csv", parseRow, function(err, data) {
 
   groups.append('image')
     .attr('xlink:href', function(d) { return "/logos/" + d.key + ".svg" })
-    .attr('x', -38)
-    .attr('width', 32)
-    .attr('height', 32)
+    .attr('x', -46)
+    .attr('width', 42)
+    .attr('height', 42)
 
   groups.append('g')
     .attr('class', 'coaches')
-  .selectAll('path')
+  .selectAll('line.year')
     .data(function(d) { return d.values })
-  .enter().append('path')
+  .enter().append('line')
+    .attr('class', 'year')
+    .attr('x1', function(d) { return x(d.start) })
+    .attr('x2', function(d) { return x(d.end) })
+    .attr('y1', y.bandwidth() / 2 - 8)
+    .attr('y2', y.bandwidth() / 2 - 8)
 
   svg.append('g')
     .attr('class', 'x')
+    .attr('transform', 'translate(0, -20)')
     .call(xax)
 })
 </script>
