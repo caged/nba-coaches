@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NBA Head Coaches</title>
+  <style>
+  body {
+    font-family: Helvetica Neue, Helvetica, sans-serif;
+  }
+
+  .domain {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1;
+    shape-rendering: crispedges;
+  }
+
+  .tick text {
+    font-weight: bold;
+    font-size: 12px;
+  }
+  </style>
+  <script src="https://d3js.org/d3.v4.0.0-alpha.35.min.js"></script>
+</head>
+<body>
+<script>
+
+// Translate old teams to their modern representation
+var TEAMS = {
+  NOK: 'OKC',
+  SEA: 'OKC',
+  NOJ: 'UTA',
+  BAL: 'WAS',
+  CHP: 'WAS',
+  CHZ: 'WAS',
+  WSB: 'WAS',
+  CAP: 'WAS',
+  BUF: 'LAC',
+  SDC: 'LAC',
+  MLH: 'ATL',
+  STL: 'ATL',
+  TRI: 'ATL',
+  VAN: 'MEM',
+  ROC: 'SAC',
+  KCK: 'SAC',
+  KCO: 'SAC',
+  CIN: 'SAC',
+  SDR: 'HOU',
+  CHO: 'CHA',
+  CHH: 'CHA',
+  PHW: 'GSW',
+  SFW: 'GSW',
+  SYR: 'PHI',
+  MNL: 'LAL',
+  FTW: 'DET',
+  NYN: 'BKN',
+  NJN: 'BKN',
+  BRK: 'BKN',
+  NOH: 'NOP',
+  PHO: 'PHX'
+}
+
+// Teams that are no longer around
+var DEFUNCT = ['SHE', 'WAT', 'STB', 'WSC', 'AND', 'DNN', 'CHS', 'BLB', 'INO']
+
+var margin = { top: 50, right: 20, bottom: 0, left: 50 },
+    width  = 1400 - margin.left - margin.right,
+    height = 1400 - margin.top - margin.bottom
+
+function parseRow(row) {
+  row.start = +row.season.split('-')[0]
+  row.end   = row.start + 1
+  if(team = TEAMS[row.team]) row.team = team
+  return row
+}
+
+d3.csv("/coaches.csv", parseRow, function(err, data) {
+  data = data.filter(function(d) { return !DEFUNCT.includes(d.team) })
+  var teams = d3.nest()
+    .key(function(d) { return d.team })
+    .sortKeys(d3.ascending)
+    .entries(data)
+
+  var x = d3.scaleLinear()
+    .domain(d3.extent(data, function(d) { return d.start }))
+    .range([0, width])
+
+  var y = d3.scaleBand()
+    .domain(teams.map(function(d) { return d.key }).sort(d3.descending))
+    .range([height, 0])
+
+  var xax = d3.axisTop()
+    .tickFormat(function(d) { return +d })
+    .scale(x)
+
+  var svg = d3.select("#container").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+  var groups = svg.selectAll('.team')
+    .data(teams)
+  .enter().append('g')
+    .attr('class', function(d) { return "team " + d.key })
+    .attr('transform', function(d) { return "translate(0, " + y(d.key) + ")" })
+
+  groups.append('image')
+    .attr('xlink:href', function(d) { return "/logos/" + d.key + ".svg" })
+    .attr('x', -38)
+    .attr('width', 32)
+    .attr('height', 32)
+
+  groups.append('g')
+    .attr('class', 'coaches')
+  .selectAll('path')
+    .data(function(d) { return d.values })
+  .enter().append('path')
+
+  svg.append('g')
+    .attr('class', 'x')
+    .call(xax)
+})
+</script>
+<div id="container"></div>
+</body>
+</html>
