@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+require 'faraday'
+require 'faraday_middleware'
+require 'active_support/cache'
+require 'csv'
+
+coach_urls = []
+csv = CSV.open('coaches.csv', 'w',
+  headers: %w(name season age team games wins losses gabv_500 po_games po_wins po_losses),
+  write_headers: true)
+
+conn = Faraday.new(:url => "http://www.basketball-reference.com") do |faraday|
+  faraday.use FaradayMiddleware::FollowRedirects
+  faraday.adapter  Faraday.default_adapter
+end
+
+response = conn.get('coaches')
+doc = Nokogiri::HTML(response.body)
+table = doc.css('#coaches')
+table.css('tr').each do |row|
+  anchor = row.at('td a')
+  next if anchor.nil?
+  coach_urls << [anchor.content.strip, anchor.attr("href")]
+end
+
+total_coaches = coach_urls.length
+coach_urls.each_with_index do |coach, idx|
+  name, url = coach
+  puts "Fetching #{name}.  Coach #{idx} of #{total_coaches}..."
+
+  response = conn.get(url)
+  doc = Nokogiri::HTML(response.body)
+  rows = doc.css('#stats tbody tr')
+  rows.each do |row|
+    cells = row.css('td')
+
+    next if cells.length != 15
+    league = cells[2].content.strip.downcase
+    next if league != 'nba'
+
+    csv << [
+      name,
+      cells[0].content.strip,
+      cells[1].content.strip,
+      cells[3].content.strip,
+      cells[4].content.strip,
+      cells[5].content.strip,
+      cells[6].content.strip,
+      cells[8].content.strip,
+      cells[10].content.strip,
+      cells[11].content.strip,
+      cells[12].content.strip
+    ]
+  end
+end
