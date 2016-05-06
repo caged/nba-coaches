@@ -49,27 +49,28 @@ rows.each do |r|
 end
 
 rows = rows.select { |t| !DEFUNCT.include?(t[:team]) }
-teams = rows.group_by {|r| r[:team] }
+teams = rows.select {|r| r[:team] == 'POR' }.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
   tenures = []
   idx = 0
+  last_a = nil
 
   coaches.sort_by! { |c| c[:season] }
   coaches.each_cons(2) do |a, b|
-    existing_coach = tenures.detect { |t| t && t[0][:name] == a[:name] }
-    if existing_coach
-      existing_coach.push(a)
-      next
-    end
+    puts "#{a[:name]}, #{b[:name]}"
+    # if last_a && last_a[:name] == a[:name]
+    #   next
+    # end
 
-    if a[:name] != b[:name]
+    if a[:name] != b[:name] && !last_a.nil?
       idx += 1
     end
 
     tenures[idx] ||= []
     tenures[idx].push(a)
+    last_a = a
   end
 
   [name, tenures]
