@@ -88,7 +88,30 @@ d3.csv("/coaches.csv", parseRow, function(err, data) {
   var teams = d3.nest()
     .key(function(d) { return d.team })
     .sortKeys(d3.ascending)
+    .sortValues(function(a, b) {
+      return d3.ascending(a.start, b.start)
+    })
     .entries(data)
+
+  teams = teams.filter(function(t) { return t.key == 'BKN'})
+  teams.forEach(function(team) {
+    var idx = 0, last
+    team.coaches = []
+
+    team.values.forEach(function(coach, index) {
+      if(last && last != coach.name) {
+        idx += 1
+        team.coaches[idx] = []
+      } else if (index == 0) {
+        team.coaches[idx] = []
+      }
+
+      team.coaches[idx].push(coach)
+      last = coach.name
+    })
+  })
+
+  console.log(teams[0].coaches);
 
   var x = d3.scaleLinear()
     .domain([minYear, maxYear])
