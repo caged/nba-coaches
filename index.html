@@ -100,6 +100,11 @@ d3.csv("/coaches.csv", parseRow, function(err, data) {
 
     team.values.forEach(function(coach, index) {
       if(last && last != coach.name) {
+        var existingCoach = team.coaches.find(function(t) { return t[0].name == coach.name })
+        if(existingCoach) {
+          return existingCoach.push(coach)
+        }
+
         idx += 1
         team.coaches[idx] = []
       } else if (index == 0) {

@@ -1,0 +1,92 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'csv'
+require 'pp'
+
+# Translate old teams to their modern representation
+TEAMS = {
+  NOK: 'OKC',
+  SEA: 'OKC',
+  NOJ: 'UTA',
+  BAL: 'WAS',
+  CHP: 'WAS',
+  CHZ: 'WAS',
+  WSB: 'WAS',
+  CAP: 'WAS',
+  BUF: 'LAC',
+  SDC: 'LAC',
+  MLH: 'ATL',
+  STL: 'ATL',
+  TRI: 'ATL',
+  VAN: 'MEM',
+  ROC: 'SAC',
+  KCK: 'SAC',
+  KCO: 'SAC',
+  CIN: 'SAC',
+  SDR: 'HOU',
+  CHO: 'CHA',
+  CHH: 'CHA',
+  PHW: 'GSW',
+  SFW: 'GSW',
+  SYR: 'PHI',
+  MNL: 'LAL',
+  FTW: 'DET',
+  NYN: 'BKN',
+  NJN: 'BKN',
+  BRK: 'BKN',
+  NOH: 'NOP',
+  PHO: 'PHX'
+}
+
+# Teams that are no longer around
+DEFUNCT = ['SHE', 'WAT', 'STB', 'WSC', 'AND', 'DNN', 'CHS', 'BLB', 'INO']
+
+rows = CSV.read("coaches.csv", headers: true, header_converters: :symbol)
+rows.each do |r|
+  abbr = r[:team].to_sym
+  r[:team] = TEAMS.has_key?(abbr) ? TEAMS[abbr] : abbr.to_s
+end
+
+rows = rows.select { |t| !DEFUNCT.include?(t[:team]) }
+teams = rows.group_by {|r| r[:team] }
+
+# Group coaches by tenures
+teams = teams.map do |name, coaches|
+  tenures = []
+  idx = 0
+
+  coaches.sort_by! { |c| c[:season] }
+  coaches.each_cons(2) do |a, b|
+    existing_coach = tenures.detect { |t| t && t[0][:name] == a[:name] }
+    if existing_coach
+      existing_coach.push(a)
+      next
+    end
+
+    if a[:name] != b[:name]
+      idx += 1
+    end
+
+    tenures[idx] ||= []
+    tenures[idx].push(a)
+  end
+
+  [name, tenures]
+  # enum = coaches.each
+  # actual = enum.first
+  # coaches.slice_before do |c|
+  #   expected, coach = enum.next, c
+  #   expected[:name] != actual[:name]
+  # end.to_a
+end
+
+teams.each do |name, tenures|
+  puts "------------- #{name} --------------------"
+  tenures.each do |coach|
+    puts "-"
+    coach.each do |season|
+      puts "#{season[:season]} - #{season[:name]}"
+    end
+  end
+end
