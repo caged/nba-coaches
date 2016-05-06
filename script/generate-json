@@ -54,44 +54,20 @@ rows.each do |row|
   row[:finish] = row[:start] + 1
 end
 
+# teams = rows.select { |r| r[:team] == 'POR' }
 teams = rows.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
+  tenures = {}
+  coaches.sort_by! {|c| c[:start] }
+  seasons = coaches.map { |c| c[:season] }.uniq
+  seasons.each do |season|
+    tenures[season] = coaches.select { |c| c[:season] == season }.map(&:to_h)
+  end
 
-  coaches.sort_by! { |c| [ c[:name], c[:season] ] }
-  pp coaches
-  exit
-  # coaches.each_cons(2) do |a, b|
-  #   existing_coach = tenures.detect { |t| t && t[0][:name] == a[:name] }
-  #   if existing_coach
-  #     existing_coach.push(a)
-  #     next
-  #   end
-  #
-  #   if a[:name] != b[:name]
-  #     idx += 1
-  #   end
-  #
-  #   tenures[idx] ||= []
-  #   tenures[idx].push(a)
-  # end
-  #
-  # [name, tenures]
-  # # enum = coaches.each
-  # # actual = enum.first
-  # # coaches.slice_before do |c|
-  # #   expected, coach = enum.next, c
-  # #   expected[:name] != actual[:name]
-  # # end.to_a
-# end
-
-# teams.each do |name, tenures|
-#   puts "------------- #{name} --------------------"
-#   tenures.each do |coach|
-#     puts "-"
-#     coach.each do |season|
-#       puts "#{season[:season]} - #{season[:name]}"
-#     end
-#   end
+  [name, tenures]
 end
+
+
+puts JSON.pretty_generate(teams)
