@@ -54,20 +54,36 @@ rows.each do |row|
   row[:finish] = row[:start] + 1
 end
 
-# teams = rows.select { |r| r[:team] == 'POR' }
-teams = rows.group_by {|r| r[:team] }
+teams = rows.select { |r| r[:team] == 'MIN' }
+teams = teams.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
-  tenures = {}
-  coaches.sort_by! {|c| c[:start] }
-  seasons = coaches.map { |c| c[:season] }.uniq
-  seasons.each do |season|
-    tenures[season] = coaches.select { |c| c[:season] == season }.map(&:to_h)
+  coaches.map!(&:to_h)
+  grouped_coaches = coaches.group_by { |c| c[:name] }
+  grouped_coaches.each do |coach, years|
+    years = years.sort_by { |y| y[:start] }
+    years.each_cons(2) do |a, b|
+
+    end
   end
 
-  [name, tenures]
+  # tenures = {}
+  # tenures.compare_by_identity
+  # tenures['a'] = 'foo'
+  # tenures['a'] = 'bar'
+  # pp tenures
 end
+# teams = teams.map do |name, coaches|
+#   tenures = {}
+#   coaches.sort_by! {|c| c[:start] }
+#   seasons = coaches.map { |c| c[:season] }.uniq
+#   seasons.each do |season|
+#     tenures[season] = coaches.select { |c| c[:season] == season }.map(&:to_h)
+#   end
+#
+#   [name, tenures]
+# end
 
 
-puts JSON.pretty_generate(teams)
+# puts JSON.pretty_generate(teams)
