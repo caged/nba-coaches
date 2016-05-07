@@ -54,26 +54,30 @@ rows.each do |row|
   row[:finish] = row[:start] + 1
 end
 
-teams = rows.select { |r| r[:team] == 'MIN' }
+teams = rows.select { |r| r[:team] == 'BKN' }
 teams = teams.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
-  coaches.map!(&:to_h)
-  grouped_coaches = coaches.group_by { |c| c[:name] }
-  grouped_coaches.each do |coach, years|
-    years = years.sort_by { |y| y[:start] }
-    years.each_cons(2) do |a, b|
+  coaches.map!(&:to_h).sort_by! { |c| [c[:name], c[:season]] }
 
+  coaching_stints = coaches.each_with_object([]) do |coach, stints|
+    last_stint = stints.last
+    if [coach[:name], coach[:start]] == last_stint&.fetch_values(:coach, :finish)
+      last_stint[:finish] = coach[:finish]
+    else
+      stints << {
+        coach: coach[:name],
+        start: coach[:start],
+        finish: coach[:finish]
+      }
     end
   end
-
-  # tenures = {}
-  # tenures.compare_by_identity
-  # tenures['a'] = 'foo'
-  # tenures['a'] = 'bar'
-  # pp tenures
+  [name, coaching_stints.sort_by { |c| [c[:start], c[:finish]] }]
 end
+
+pp teams
+
 # teams = teams.map do |name, coaches|
 #   tenures = {}
 #   coaches.sort_by! {|c| c[:start] }
