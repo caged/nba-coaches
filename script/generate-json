@@ -42,20 +42,27 @@ TEAMS = {
 # Teams that are no longer around
 DEFUNCT = ['SHE', 'WAT', 'STB', 'WSC', 'AND', 'DNN', 'CHS', 'BLB', 'INO']
 
-rows = CSV.read("coaches.csv", headers: true, header_converters: :symbol)
+rows = CSV.read("coaches.csv",
+  headers: true,
+  header_converters: :symbol,
+  converters: :numeric)
+
 rows.each do |r|
   abbr = r[:team].to_sym
   r[:team] = TEAMS.has_key?(abbr) ? TEAMS[abbr] : abbr.to_s
 end
 
-rows = rows.select { |t| !DEFUNCT.include?(t[:team]) }
 rows.each do |row|
   row[:start] = row[:season].split('-').first.to_i
   row[:finish] = row[:start] + 1
 end
 
-teams = rows.select { |r| r[:team] == 'BKN' }
-teams = teams.group_by {|r| r[:team] }
+rows = rows.select do |t|
+  !DEFUNCT.include?(t[:team]) && t[:start] >= 1970
+end
+
+# teams = rows.select { |r| r[:team] == 'MIN' }
+teams = rows.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
@@ -65,29 +72,17 @@ teams = teams.map do |name, coaches|
     last_stint = stints.last
     if [coach[:name], coach[:start]] == last_stint&.fetch_values(:coach, :finish)
       last_stint[:finish] = coach[:finish]
+      last_stint[:years].push(coach.delete_if {|c| [:name, :team].include?(c)})
     else
       stints << {
         coach: coach[:name],
         start: coach[:start],
-        finish: coach[:finish]
+        finish: coach[:finish],
+        years: [coach.delete_if {|c| [:name, :team].include?(c)}]
       }
     end
   end
   [name, coaching_stints.sort_by { |c| [c[:start], c[:finish]] }]
 end
 
-pp teams
-
-# teams = teams.map do |name, coaches|
-#   tenures = {}
-#   coaches.sort_by! {|c| c[:start] }
-#   seasons = coaches.map { |c| c[:season] }.uniq
-#   seasons.each do |season|
-#     tenures[season] = coaches.select { |c| c[:season] == season }.map(&:to_h)
-#   end
-#
-#   [name, tenures]
-# end
-
-
-# puts JSON.pretty_generate(teams)
+puts JSON.pretty_generate(teams)
