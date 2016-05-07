@@ -23,6 +23,12 @@
     stroke-width: 3;
     stroke: #eee;
   }
+
+  .coach-name {
+    font-size: 10px;
+    fill: #333;
+    stroke: none;
+  }
   </style>
   <script src="https://d3js.org/d3.v4.0.0-alpha.35.min.js"></script>
 </head>
@@ -80,6 +86,10 @@ d3.json("/coaching.json", function(err, teams) {
     .attr('x2', function(d) { return x(d.finish) })
     .attr('y1', y.bandwidth() / 2 - 8)
     .attr('y2', y.bandwidth() / 2 - 8)
+
+  stint.append('text')
+    .attr('class', 'coach-name')
+    .text(function(d) { return d.coach })
 
   svg.append('g')
     .attr('class', 'x')
