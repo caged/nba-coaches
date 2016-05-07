@@ -28,102 +28,20 @@
 </head>
 <body>
 <script>
-
-// Translate old teams to their modern representation
-var TEAMS = {
-  NOK: 'OKC',
-  SEA: 'OKC',
-  NOJ: 'UTA',
-  BAL: 'WAS',
-  CHP: 'WAS',
-  CHZ: 'WAS',
-  WSB: 'WAS',
-  CAP: 'WAS',
-  BUF: 'LAC',
-  SDC: 'LAC',
-  MLH: 'ATL',
-  STL: 'ATL',
-  TRI: 'ATL',
-  VAN: 'MEM',
-  ROC: 'SAC',
-  KCK: 'SAC',
-  KCO: 'SAC',
-  CIN: 'SAC',
-  SDR: 'HOU',
-  CHO: 'CHA',
-  CHH: 'CHA',
-  PHW: 'GSW',
-  SFW: 'GSW',
-  SYR: 'PHI',
-  MNL: 'LAL',
-  FTW: 'DET',
-  NYN: 'BKN',
-  NJN: 'BKN',
-  BRK: 'BKN',
-  NOH: 'NOP',
-  PHO: 'PHX'
-}
-
-// Teams that are no longer around
-var DEFUNCT = ['SHE', 'WAT', 'STB', 'WSC', 'AND', 'DNN', 'CHS', 'BLB', 'INO']
-
 var margin = { top: 50, right: 20, bottom: 0, left: 50 },
     width  = 1400 - margin.left - margin.right,
     height = 1800 - margin.top - margin.bottom
 
 var line = d3.line()
 
-function parseRow(row) {
-  row.start = +row.season.split('-')[0]
-  row.end   = row.start + 1
-  if(team = TEAMS[row.team]) row.team = team
-  return row
-}
-
-d3.csv("/coaches.csv", parseRow, function(err, data) {
-  data = data.filter(function(d) { return !DEFUNCT.includes(d.team) && d.start >= 1970 })
-  var maxYear = d3.max(data, function(d) { return d.end }),
-      minYear = d3.min(data, function(d) { return d.start })
-
-  var teams = d3.nest()
-    .key(function(d) { return d.team })
-    .sortKeys(d3.ascending)
-    .sortValues(function(a, b) {
-      return d3.ascending(a.start, b.start)
-    })
-    .entries(data)
-
-  teams = teams.filter(function(t) { return t.key == 'BKN'})
-  teams.forEach(function(team) {
-    var idx = 0, last
-    team.coaches = []
-
-    team.values.forEach(function(coach, index) {
-      if(last && last != coach.name) {
-        var existingCoach = team.coaches.find(function(t) { return t[0].name == coach.name })
-        if(existingCoach) {
-          return existingCoach.push(coach)
-        }
-
-        idx += 1
-        team.coaches[idx] = []
-      } else if (index == 0) {
-        team.coaches[idx] = []
-      }
-
-      team.coaches[idx].push(coach)
-      last = coach.name
-    })
-  })
-
-  console.log(teams[0].coaches);
+d3.json("/coaching.json", function(err, teams) {
 
   var x = d3.scaleLinear()
-    .domain([minYear, maxYear])
+    .domain([1970, 2017])
     .range([0, width])
 
   var y = d3.scaleBand()
-    .domain(teams.map(function(d) { return d.key }).sort(d3.descending))
+    .domain(teams.map(function(d) { return d[0] }).sort(d3.descending))
     .range([height, 0])
 
   var xax = d3.axisTop()
@@ -139,11 +57,11 @@ d3.csv("/coaches.csv", parseRow, function(err, data) {
   var groups = svg.selectAll('.team')
     .data(teams)
   .enter().append('g')
-    .attr('class', function(d) { return "team " + d.key })
-    .attr('transform', function(d) { return "translate(0, " + y(d.key) + ")" })
+    .attr('class', function(d) { return "team " + d[0] })
+    .attr('transform', function(d) { return "translate(0, " + y(d[0]) + ")" })
 
   groups.append('image')
-    .attr('xlink:href', function(d) { return "/logos/" + d.key + ".svg" })
+    .attr('xlink:href', function(d) { return "/logos/" + d[0] + ".svg" })
     .attr('x', -46)
     .attr('width', 42)
     .attr('height', 42)
@@ -151,11 +69,11 @@ d3.csv("/coaches.csv", parseRow, function(err, data) {
   groups.append('g')
     .attr('class', 'coaches')
   .selectAll('line.year')
-    .data(function(d) { return d.values })
+    .data(function(d) { return d[1] })
   .enter().append('line')
     .attr('class', 'year')
     .attr('x1', function(d) { return x(d.start) })
-    .attr('x2', function(d) { return x(d.end) })
+    .attr('x2', function(d) { return x(d.finish) })
     .attr('y1', y.bandwidth() / 2 - 8)
     .attr('y2', y.bandwidth() / 2 - 8)
 
