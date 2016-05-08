@@ -130,19 +130,18 @@ teams.each do |team, coaches|
   # ignoring the interm coaching games
   season_games = coaches.map { |c| c[:years].map {|y| Hash[y[:season], y[:games]] }}.flatten
   season_games = season_games.inject { |memo, el| memo.merge( el ) { |k, old_v, new_v| old_v + new_v } }
-
   coaches.each do |coach|
     first_year = coach[:years].first
     last_year  = coach[:years].last
-    first_season = first_year[:season]
-    last_season  = last_year[:season]
+    first_season_games = season_games[first_year[:season]].to_f
+    last_season_games  = season_games[last_year[:season]].to_f
 
-    if first_year[:games] < 82 && first_year[:season] != '1998-99'
-      coach[:sos] = (first_year[:games] / season_games[first_season].to_f).round(4)
+    if first_year[:games] < first_season_games && first_year[:season] != '1998-99'
+      coach[:sos] = (first_year[:games] / first_season_games).round(4)
     end
 
-    if last_year[:games] < 82 && last_year[:season] != '1998-99' && coach[:years].length > 1
-      coach[:eos] = -((last_year[:games]) / season_games[last_season].to_f).round(4)
+    if last_year[:games] < last_season_games && last_year[:season] != '1998-99' && coach[:years].length > 1
+      coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
     end
   end
 end
