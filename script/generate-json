@@ -6,7 +6,7 @@ require 'pp'
 
 # Translate old teams to their modern representation
 TEAMS = {
-  NOK: 'OKC',
+  NOK: 'NOP',
   SEA: 'OKC',
   NOJ: 'UTA',
   BAL: 'WAS',
