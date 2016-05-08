@@ -58,11 +58,11 @@ rows.each do |row|
 end
 
 rows = rows.select do |t|
-  !DEFUNCT.include?(t[:team]) && t[:start] >= 1970
+  !DEFUNCT.include?(t[:team]) && t[:start] >= 1990
 end
 
-# teams = rows.select { |r| r[:team] == 'MIN' }
-teams = rows.group_by {|r| r[:team] }
+teams = rows.select { |r| r[:team] == 'POR' }
+teams = teams.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
@@ -74,15 +74,77 @@ teams = teams.map do |name, coaches|
       last_stint[:finish] = coach[:finish]
       last_stint[:years].push(coach.delete_if {|c| [:name, :team].include?(c)})
     else
+
+      # Determine how to offset cases where multiple coaches coach
+      # in the same year.  We want to determine what percentage of
+      # games each coach coached and whether that was at the start
+      # of the season or finishing the season.
+      # percent_of_season = 0
+      # edge_of_season = nil
+      #
+      # if coach[:games] < 82 && coach[:season] != '1998-99'
+      #   stints.each do |stint|
+      #     stints.
+      #   end
+      # end
+
+      # if last_stint && last_stint[:coach] == 'Nate McMillan'
+      #   puts last_stint
+      #   puts "COACH: #{coach[:name]}"
+      # end
+      #
+      # finish = last_stint&.fetch(:finish)
+      # if last_stint && ([finish, finish - 1].include?(coach[:start]))
+      #   last_stint[:pos] = 1.0 - (last_stint[:years].last[:games] / 82.0).round(2)
+      #   last_stint[:eos] = 'f'
+      # else
+      #   percent_of_season = 1.0 - (coach[:games] / 82.0).round(2)
+      #   edge_of_season = 's' if coach[:games] < 82
+      # end
+
       stints << {
         coach: coach[:name],
         start: coach[:start],
         finish: coach[:finish],
+        team: coach[:team],
+        eos: 0,
+        sos: 0,
         years: [coach.delete_if {|c| [:name, :team].include?(c)}]
       }
     end
   end
   [name, coaching_stints.sort_by { |c| [c[:start], c[:finish]] }]
+end
+
+# We need to do some extra work for seasons that lists two coaches.  This usually
+# happens when a coach is fired midseason.  We want to get the percentage of games
+# at the beginning and ending of the first and final seasons respectively for each
+# coach that we can combine with the year later when visualizing this information.
+teams.each do |team, coaches|
+  # Sometimes the number of games sums to something lower than 82.  This might
+  # happen when an temporary interm coach is coaching during the season, but they
+  # never are appointed _head_ coach.
+  #
+  # We wan to divide by this number later so we can get the percentage of a season
+  # a specific coach coached.  In cases where this is less than 82, we're comfortable
+  # ignoring the interm coaching games
+  season_games = coaches.map { |c| c[:years].map {|y| Hash[y[:season], y[:games]] }}.flatten
+  season_games = season_games.inject { |memo, el| memo.merge( el ) { |k, old_v, new_v| old_v + new_v } }
+
+  coaches.each do |coach|
+    first_year = coach[:years].first
+    last_year  = coach[:years].last
+    first_season = first_year[:season]
+    last_season  = last_year[:season]
+
+    if first_year[:games] < 82 && first_year[:season] != '1998-99'
+      coach[:sos] = (first_year[:games] / season_games[first_season].to_f).round(4)
+    end
+
+    if last_year[:games] < 82 && last_year[:season] != '1998-99' && coach[:years].length > 1
+      coach[:eos] = -((last_year[:games]) / season_games[last_season].to_f).round(4)
+    end
+  end
 end
 
 puts JSON.pretty_generate(teams)
