@@ -10,7 +10,7 @@
   .domain {
     fill: none;
     stroke: #ccc;
-    stroke-width: 1;
+    stroke-width: 0;
     shape-rendering: crispedges;
   }
 
@@ -19,31 +19,59 @@
     font-size: 12px;
   }
 
-  .year {
-    stroke-width: 3;
-    stroke: #eee;
+  .tick line {
+    stroke-width: 1;
+    stroke: #f7f7f7;
+    shape-rendering: crispedges;
   }
 
-  .coach-name {
+  .backing {
+    stroke: none;
+    fill: #eee;
+    fill-opacity: 0.5;
+    shape-rendering: crispedges;
+  }
+
+  .year {
+    stroke-width: 3;
+    stroke: #aaa;
+    stroke-opacity: 0.3;
+  }
+
+  .year:last-child line {
+    stroke: #7fce4e;
+  }
+
+  .divide {
+    stroke: #c00;
+    stroke-width: 1;
+    stroke-opacity: 1;
+  }
+
+  .label {
     font-size: 10px;
     fill: #333;
     stroke: none;
+    text-anchor: middle;
   }
   </style>
   <script src="https://d3js.org/d3.v4.0.0-alpha.35.min.js"></script>
+  <script src="https://cdn.rawgit.com/tinker10/D3-Labeler/master/labeler.js"></script>
 </head>
 <body>
 <script>
-var margin = { top: 50, right: 20, bottom: 0, left: 50 },
+var margin = { top: 75, right: 20, bottom: 0, left: 50 },
     width  = 1400 - margin.left - margin.right,
-    height = 1800 - margin.top - margin.bottom
+    height = 1800 - margin.top - margin.bottom,
+    iconWidth = margin.left - 10,
+    labelArray = [],
+    anchorArray = []
 
 var line = d3.line()
 
 d3.json("/coaching.json", function(err, teams) {
-
   var x = d3.scaleLinear()
-    .domain([1970, 2017])
+    .domain([1990, 2016])
     .range([0, width])
 
   var y = d3.scaleBand()
@@ -52,13 +80,36 @@ d3.json("/coaching.json", function(err, teams) {
 
   var xax = d3.axisTop()
     .tickFormat(function(d) { return +d })
+    .tickSize(-height)
     .scale(x)
+
+  function computeLabel(stint, idx) {
+    var name = stint.coach.split(' '),
+        midX = x(stint.start) + ((x(stint.finish) - x(stint.start)) / 2)
+    name = name[name.length - 1]
+    // console.log(x(stint.start) + (x(stint.finish) - x(stint.start)) / 2, name);
+    var item = {
+      x: midX,
+      y: y(stint.team) - 5,
+      name: name,
+      width: 0,
+      height: 0
+    }
+
+    labelArray.push(item)
+    anchorArray.push({x: item.x, y: item.y - 10, r: 3 })
+  }
 
   var svg = d3.select("#container").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+  svg.append('g')
+    .attr('class', 'x')
+    .attr('transform', 'translate(0, -50)')
+    .call(xax)
 
   var groups = svg.selectAll('.team')
     .data(teams)
@@ -69,8 +120,9 @@ d3.json("/coaching.json", function(err, teams) {
   groups.append('image')
     .attr('xlink:href', function(d) { return "/logos/" + d[0] + ".svg" })
     .attr('x', -46)
-    .attr('width', 42)
-    .attr('height', 42)
+    .attr('y', -((y.bandwidth() / 1.5) - (iconWidth / 2)))
+    .attr('width', iconWidth)
+    .attr('height', iconWidth)
 
   var coachgroup = groups.append('g')
     .attr('class', 'coaches')
@@ -79,22 +131,90 @@ d3.json("/coaching.json", function(err, teams) {
     .data(function(d) { return d[1] })
   .enter().append('g')
     .attr('class', 'year')
-    .attr('transform', function(d) { return "translate(" + x(d.start) + ", 0)"})
+    .attr('transform', function(d) {
+      return "translate(" + x(d.start + d.sos) + ", 0)"
+    })
 
   stint.append('line')
     .attr('x1', "0")
-    .attr('x2', function(d) { return x(d.finish) })
-    .attr('y1', y.bandwidth() / 2 - 8)
-    .attr('y2', y.bandwidth() / 2 - 8)
+    .attr('x2', function(d) {
+      return x(d.eos + d.finish) - x(d.sos + d.start)
+     })
+    .attr('y1', 0)
+    .attr('y2', 0)
+    .on('click', function(d) {
+      var xf = d.eos == 'f' ? (d.finish - d.pos) : d.finish,
+          xs = d.eos == 's' ? (d.start + d.pos) : d.start
+      console.log(xf, xs, d)
+    })
+    .each(computeLabel)
 
-  stint.append('text')
-    .attr('class', 'coach-name')
-    .text(function(d) { return d.coach })
+  // stint.append('rect')
+  //   .attr('class', 'backing')
+  //   .attr('x', 0)
+  //   .attr('y', 0)
+  //   .attr('width', function(d) { return x(d.finish) - x(d.start) })
+  //   .attr('height', y.bandwidth())
+    // .each(computeLabel)
 
-  svg.append('g')
-    .attr('class', 'x')
-    .attr('transform', 'translate(0, -20)')
-    .call(xax)
+  stint.append('line')
+    .attr('class', 'divide')
+    .attr('x1', 0)
+    .attr('x2', 0)
+    .attr('y1', -5)
+    .attr('y2', 5)
+
+  var nodes = svg.selectAll('.node')
+    .data(labelArray)
+  .enter().append('circle')
+    .attr('class', 'node')
+    .attr('cx', function(d) { return d.x })
+    .attr('cy', function(d) { return d.y + 5 })
+    .attr('r', 2)
+
+  var labels = svg.selectAll('.label')
+    .data(labelArray)
+  .enter().append('text')
+    .attr('class', 'label')
+    .attr('x', function(d) { return d.x })
+    .attr('y', function(d) { return d.y })
+    .text(function(d) { return d.name })
+
+  var links = svg.selectAll(".link")
+    .data(labelArray)
+  .enter().append("line")
+    .attr("class", "link")
+    .attr("x1", function(d) { return (d.x); })
+    .attr("y1", function(d) { return (d.y); })
+    .attr("x2", function(d) { return (d.x); })
+    .attr("y2", function(d) { return (d.y); })
+    .attr("stroke-width", 0.6)
+    .attr("stroke", "gray");
+
+    labels.each(function(_, idx) {
+      labelArray[idx].width = this.getBBox().width;
+      labelArray[idx].height = this.getBBox().height;
+    });
+
+  // d3.labeler()
+  //   .label(labelArray)
+  //   .anchor(anchorArray)
+  //   .width(width)
+  //   .height(height)
+
+  // labels
+  //   .transition()
+  //   .duration(800)
+  //   .attr("x", function(d) { return (d.x); })
+  //   .attr("y", function(d) { return (d.y); });
+  //
+  // links
+  //   .transition()
+  //   .duration(800)
+  //   .attr("x2",function(d) { return (d.x); })
+  //   .attr("y2",function(d) { return (d.y); });
+
+
 })
 </script>
 <div id="container"></div>
