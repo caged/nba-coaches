@@ -40,6 +40,7 @@
 
   .year:last-child line {
     stroke: #7fce4e;
+    stroke-opacity: 0.5;
   }
 
   .divide {
@@ -85,7 +86,7 @@ d3.json("/coaching.json", function(err, teams) {
 
   function computeLabel(stint, idx) {
     var name = stint.coach.split(' '),
-        midX = x(stint.start) + ((x(stint.finish) - x(stint.start)) / 2)
+        midX = x(stint.start + stint.sos) + ((x(stint.finish + stint.eos) - x(stint.start + stint.sos)) / 2)
     name = name[name.length - 1]
     // console.log(x(stint.start) + (x(stint.finish) - x(stint.start)) / 2, name);
     var item = {
