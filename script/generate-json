@@ -49,6 +49,7 @@ rows = CSV.read("coaches.csv",
 
 rows.each do |r|
   abbr = r[:team].to_sym
+  r[:uteam] = abbr
   r[:team] = TEAMS.has_key?(abbr) ? TEAMS[abbr] : abbr.to_s
 end
 
@@ -61,8 +62,8 @@ rows = rows.select do |t|
   !DEFUNCT.include?(t[:team]) && t[:start] >= 1990
 end
 
-teams = rows.select { |r| r[:team] == 'POR' }
-teams = teams.group_by {|r| r[:team] }
+# rows = rows.select { |r| %w(NYK NOP).include?(r[:team]) }
+teams = rows.group_by {|r| r[:team] }
 
 # Group coaches by tenures
 teams = teams.map do |name, coaches|
@@ -103,19 +104,38 @@ teams.each do |team, coaches|
   # ignoring the interm coaching games
   season_games = coaches.map { |c| c[:years].map {|y| Hash[y[:season], y[:games]] }}.flatten
   season_games = season_games.inject { |memo, el| memo.merge( el ) { |k, old_v, new_v| old_v + new_v } }
-  coaches.each do |coach|
+  coaches.each_with_index do |coach, idx|
     first_year = coach[:years].first
     last_year  = coach[:years].last
     first_season_games = season_games[first_year[:season]].to_f
     last_season_games  = season_games[last_year[:season]].to_f
 
+    # Coach's first season was shortened season.  Likely took over mid-year
     if first_year[:games] < first_season_games && first_year[:season] != '1998-99'
       coach[:sos] = (first_year[:games] / first_season_games).round(4)
     end
 
+    # Coach's last game was shortend season, likely was fired or resigned mid-year
     if last_year[:games] < last_season_games && last_year[:season] != '1998-99' && coach[:years].length > 1
       coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
     end
+
+    # If a coach only had a shortend single season we need to check which end it's
+    # on.  Don Nelson did this for the NYN.
+    if coaches[idx + 1] && first_year[:games] < first_season_games
+      previous_coach = coaches[idx + 1]
+      previous_coach_last_season = previous_coach[:years].last
+      previous_coach_last_season_games = season_games[previous_coach_last_season[:season]].to_f
+
+      if coach[:years].length == 1 &&
+          previous_coach &&
+          previous_coach_last_season[:games] < previous_coach_last_season_games
+
+        coach[:sos] = 0
+        coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
+      end
+    end
+
   end
 end
 
