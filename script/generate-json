@@ -75,33 +75,6 @@ teams = teams.map do |name, coaches|
       last_stint[:years].push(coach.delete_if {|c| [:name, :team].include?(c)})
     else
 
-      # Determine how to offset cases where multiple coaches coach
-      # in the same year.  We want to determine what percentage of
-      # games each coach coached and whether that was at the start
-      # of the season or finishing the season.
-      # percent_of_season = 0
-      # edge_of_season = nil
-      #
-      # if coach[:games] < 82 && coach[:season] != '1998-99'
-      #   stints.each do |stint|
-      #     stints.
-      #   end
-      # end
-
-      # if last_stint && last_stint[:coach] == 'Nate McMillan'
-      #   puts last_stint
-      #   puts "COACH: #{coach[:name]}"
-      # end
-      #
-      # finish = last_stint&.fetch(:finish)
-      # if last_stint && ([finish, finish - 1].include?(coach[:start]))
-      #   last_stint[:pos] = 1.0 - (last_stint[:years].last[:games] / 82.0).round(2)
-      #   last_stint[:eos] = 'f'
-      # else
-      #   percent_of_season = 1.0 - (coach[:games] / 82.0).round(2)
-      #   edge_of_season = 's' if coach[:games] < 82
-      # end
-
       stints << {
         coach: coach[:name],
         start: coach[:start],
