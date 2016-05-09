@@ -98,7 +98,7 @@ end
 # at the beginning and ending of the first and final seasons respectively for each
 # coach that we can combine with the year later when visualizing this information.
 teams.each do |team, coaches|
-  coaches.reject! { |c| c[:games] < 48 }
+  coaches.reject! { |c| c[:games] < 40 }
   # Sometimes the number of games sums to something lower than 82.  This might
   # happen when an temporary interm coach is coaching during the season, but they
   # never are appointed _head_ coach.
