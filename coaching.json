@@ -3968,7 +3968,7 @@
         "finish": 2013,
         "team": "PHX",
         "games": 302,
-        "eos": 0,
+        "eos": -0.5,
         "sos": 0.378,
         "years": [
           {
@@ -4037,6 +4037,31 @@
             "po_games": "",
             "po_wins": "",
             "po_losses": "",
+            "uteam": "PHO",
+            "start": 2012,
+            "finish": 2013
+          }
+        ]
+      },
+      {
+        "coach": "Lindsey Hunter",
+        "start": 2012,
+        "finish": 2013,
+        "team": "PHX",
+        "games": 41,
+        "eos": 0,
+        "sos": 0.5,
+        "years": [
+          {
+            "season": "2012-13",
+            "age": 42,
+            "games": 41,
+            "wins": 12,
+            "losses": 29,
+            "gabv_500": -8.5,
+            "po_games": 0,
+            "po_wins": 0,
+            "po_losses": 0,
             "uteam": "PHO",
             "start": 2012,
             "finish": 2013
@@ -5639,7 +5664,7 @@
         "finish": 2016,
         "team": "BKN",
         "games": 119,
-        "eos": 0,
+        "eos": -0.4512,
         "sos": 0,
         "years": [
           {
@@ -5671,6 +5696,31 @@
             "finish": 2016
           }
         ]
+      },
+      {
+        "coach": "Tony Brown",
+        "start": 2015,
+        "finish": 2016,
+        "team": "BKN",
+        "games": 45,
+        "eos": 0,
+        "sos": 0.5488,
+        "years": [
+          {
+            "season": "2015-16",
+            "age": 55,
+            "games": 45,
+            "wins": 11,
+            "losses": 34,
+            "gabv_500": -11.5,
+            "po_games": 0,
+            "po_wins": 0,
+            "po_losses": 0,
+            "uteam": "BRK",
+            "start": 2015,
+            "finish": 2016
+          }
+        ]
       }
     ]
   ],
@@ -5683,7 +5733,7 @@
         "finish": 1992,
         "team": "SAS",
         "games": 120,
-        "eos": 0,
+        "eos": -0.4634,
         "sos": 0,
         "years": [
           {
@@ -5710,6 +5760,31 @@
             "po_games": "",
             "po_wins": "",
             "po_losses": "",
+            "uteam": "SAS",
+            "start": 1991,
+            "finish": 1992
+          }
+        ]
+      },
+      {
+        "coach": "Bob Bass",
+        "start": 1991,
+        "finish": 1992,
+        "team": "SAS",
+        "games": 44,
+        "eos": 0,
+        "sos": 0.5366,
+        "years": [
+          {
+            "season": "1991-92",
+            "age": 63,
+            "games": 44,
+            "wins": 26,
+            "losses": 18,
+            "gabv_500": 4.0,
+            "po_games": 3,
+            "po_wins": 0,
+            "po_losses": 3,
             "uteam": "SAS",
             "start": 1991,
             "finish": 1992
@@ -7334,6 +7409,31 @@
         ]
       },
       {
+        "coach": "Gar Heard",
+        "start": 1999,
+        "finish": 2000,
+        "team": "WAS",
+        "games": 44,
+        "eos": 0,
+        "sos": 0,
+        "years": [
+          {
+            "season": "1999-00",
+            "age": 51,
+            "games": 44,
+            "wins": 14,
+            "losses": 30,
+            "gabv_500": -8.0,
+            "po_games": "",
+            "po_wins": "",
+            "po_losses": "",
+            "uteam": "WAS",
+            "start": 1999,
+            "finish": 2000
+          }
+        ]
+      },
+      {
         "coach": "Leonard Hamilton",
         "start": 2000,
         "finish": 2001,
@@ -8376,6 +8476,31 @@
         ]
       },
       {
+        "coach": "Rudy Tomjanovich",
+        "start": 2004,
+        "finish": 2005,
+        "team": "LAL",
+        "games": 43,
+        "eos": 0,
+        "sos": 0,
+        "years": [
+          {
+            "season": "2004-05",
+            "age": 56,
+            "games": 43,
+            "wins": 24,
+            "losses": 19,
+            "gabv_500": 2.5,
+            "po_games": "",
+            "po_wins": "",
+            "po_losses": "",
+            "uteam": "LAL",
+            "start": 2004,
+            "finish": 2005
+          }
+        ]
+      },
+      {
         "coach": "Phil Jackson",
         "start": 2005,
         "finish": 2011,
@@ -9245,7 +9370,7 @@
         "finish": 2003,
         "team": "CLE",
         "games": 124,
-        "eos": 0,
+        "eos": -0.5122,
         "sos": 0,
         "years": [
           {
@@ -9269,6 +9394,31 @@
             "wins": 8,
             "losses": 34,
             "gabv_500": -13.0,
+            "po_games": "",
+            "po_wins": "",
+            "po_losses": "",
+            "uteam": "CLE",
+            "start": 2002,
+            "finish": 2003
+          }
+        ]
+      },
+      {
+        "coach": "Keith Smart",
+        "start": 2002,
+        "finish": 2003,
+        "team": "CLE",
+        "games": 40,
+        "eos": 0,
+        "sos": 0.4878,
+        "years": [
+          {
+            "season": "2002-03",
+            "age": 38,
+            "games": 40,
+            "wins": 9,
+            "losses": 31,
+            "gabv_500": -11.0,
             "po_games": "",
             "po_wins": "",
             "po_losses": "",
@@ -9482,7 +9632,7 @@
         "finish": 2016,
         "team": "CLE",
         "games": 123,
-        "eos": 0,
+        "eos": -0.5,
         "sos": 0,
         "years": [
           {
@@ -9508,6 +9658,31 @@
             "gabv_500": 9.5,
             "po_games": 0,
             "po_wins": 0,
+            "po_losses": 0,
+            "uteam": "CLE",
+            "start": 2015,
+            "finish": 2016
+          }
+        ]
+      },
+      {
+        "coach": "Tyronn Lue",
+        "start": 2015,
+        "finish": 2016,
+        "team": "CLE",
+        "games": 41,
+        "eos": 0,
+        "sos": 0.5,
+        "years": [
+          {
+            "season": "2015-16",
+            "age": 38,
+            "games": 41,
+            "wins": 27,
+            "losses": 14,
+            "gabv_500": 6.5,
+            "po_games": 5,
+            "po_wins": 5,
             "po_losses": 0,
             "uteam": "CLE",
             "start": 2015,
@@ -12161,7 +12336,7 @@
         "finish": 2005,
         "team": "NYK",
         "games": 81,
-        "eos": 0,
+        "eos": -0.4756,
         "sos": 0.5185,
         "years": [
           {
@@ -12185,6 +12360,31 @@
             "wins": 17,
             "losses": 22,
             "gabv_500": -2.5,
+            "po_games": "",
+            "po_wins": "",
+            "po_losses": "",
+            "uteam": "NYK",
+            "start": 2004,
+            "finish": 2005
+          }
+        ]
+      },
+      {
+        "coach": "Herb Williams",
+        "start": 2004,
+        "finish": 2005,
+        "team": "NYK",
+        "games": 43,
+        "eos": 0,
+        "sos": 0.5244,
+        "years": [
+          {
+            "season": "2004-05",
+            "age": 46,
+            "games": 43,
+            "wins": 16,
+            "losses": 27,
+            "gabv_500": -5.5,
             "po_games": "",
             "po_wins": "",
             "po_losses": "",
