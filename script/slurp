@@ -55,3 +55,6 @@ coach_urls.each_with_index do |coach, idx|
     ]
   end
 end
+
+puts "Finished!"
+puts "Some manual cleanup is in order. Remove single game season from Herb Williams, games from Bill Berkta"

@@ -71,6 +71,12 @@ var margin = { top: 75, right: 20, bottom: 0, left: 50 },
 var line = d3.line()
 
 d3.json("/coaching.json", function(err, teams) {
+  teams.forEach(function(d) {
+    console.log(d[0], d[1]);
+  })
+
+  // teams = teams.sort(function(a, b) { return d3.descending(a[1].length, b[1].length)})
+
   var x = d3.scaleLinear()
     .domain([1990, 2016])
     .range([0, width])
@@ -82,6 +88,7 @@ d3.json("/coaching.json", function(err, teams) {
   var xax = d3.axisTop()
     .tickFormat(function(d) { return +d })
     .tickSize(-height)
+    .ticks(20)
     .scale(x)
 
   function computeLabel(stint, idx) {
@@ -162,6 +169,13 @@ d3.json("/coaching.json", function(err, teams) {
     .attr('class', 'divide')
     .attr('x1', 0)
     .attr('x2', 0)
+    .attr('y1', -5)
+    .attr('y2', 5)
+
+  stint.append('line')
+    .attr('class', 'divide')
+    .attr('x1', function(d) { return x(d.eos + d.finish) - x(d.sos + d.start) })
+    .attr('x2', function(d) { return x(d.eos + d.finish) - x(d.sos + d.start) })
     .attr('y1', -5)
     .attr('y2', 5)
 

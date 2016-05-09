@@ -62,7 +62,8 @@ rows = rows.select do |t|
   !DEFUNCT.include?(t[:team]) && t[:start] >= 1990
 end
 
-# rows = rows.select { |r| %w(NYK NOP).include?(r[:team]) }
+# rows = rows.select { |r| %w(CHA).include?(r[:team]) }
+# rows = rows.select { |r| r[:games] >= 48 }
 teams = rows.group_by {|r| r[:team] }
 
 # Group coaches by tenures
@@ -73,6 +74,7 @@ teams = teams.map do |name, coaches|
     last_stint = stints.last
     if [coach[:name], coach[:start]] == last_stint&.fetch_values(:coach, :finish)
       last_stint[:finish] = coach[:finish]
+      last_stint[:games] += coach[:games]
       last_stint[:years].push(coach.delete_if {|c| [:name, :team].include?(c)})
     else
 
@@ -81,6 +83,7 @@ teams = teams.map do |name, coaches|
         start: coach[:start],
         finish: coach[:finish],
         team: coach[:team],
+        games: coach[:games],
         eos: 0,
         sos: 0,
         years: [coach.delete_if {|c| [:name, :team].include?(c)}]
@@ -95,6 +98,7 @@ end
 # at the beginning and ending of the first and final seasons respectively for each
 # coach that we can combine with the year later when visualizing this information.
 teams.each do |team, coaches|
+  coaches.reject! { |c| c[:games] < 48 }
   # Sometimes the number of games sums to something lower than 82.  This might
   # happen when an temporary interm coach is coaching during the season, but they
   # never are appointed _head_ coach.
@@ -110,13 +114,16 @@ teams.each do |team, coaches|
     first_season_games = season_games[first_year[:season]].to_f
     last_season_games  = season_games[last_year[:season]].to_f
 
+    # puts "LSG: #{last_season_games} - #{coach[:coach]}"
+    # puts "FSG: #{first_season_games} - #{coach[:coach]}"
+
     # Coach's first season was shortened season.  Likely took over mid-year
-    if first_year[:games] < first_season_games && first_year[:season] != '1998-99'
+    if first_year[:games] < first_season_games
       coach[:sos] = (first_year[:games] / first_season_games).round(4)
     end
 
     # Coach's last game was shortend season, likely was fired or resigned mid-year
-    if last_year[:games] < last_season_games && last_year[:season] != '1998-99' && coach[:years].length > 1
+    if last_year[:games] < last_season_games && coach[:years].length > 1
       coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
     end
 
@@ -127,13 +134,13 @@ teams.each do |team, coaches|
       previous_coach_last_season = previous_coach[:years].last
       previous_coach_last_season_games = season_games[previous_coach_last_season[:season]].to_f
 
-      if coach[:years].length == 1 &&
-          previous_coach &&
-          previous_coach_last_season[:games] < previous_coach_last_season_games
-
-        coach[:sos] = 0
-        coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
-      end
+      # if coach[:years].length == 1 &&
+      #     previous_coach &&
+      #     previous_coach_last_season[:games] < previous_coach_last_season_games
+      #
+      #   coach[:sos] = 0
+      #   coach[:eos] = -((last_year[:games]) / last_season_games).round(4)
+      # end
     end
 
   end
